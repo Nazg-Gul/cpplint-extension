@@ -35,14 +35,15 @@ function cpplintSeverityToDiagnosticSeverity(severity: string): vscode.Diagnosti
 export function analysisResult(diagnosticCollection: vscode.DiagnosticCollection, result: string) {
     diagnosticCollection.clear();
 
-    // 1 = path, 2 = line, 3 = severity, 4 = message
-    let regex = /^(.*)\(([0-9]+)\):\s*(\w+):(.*\s+\[.*\])\s+\[([0-9]+)\]/gm;
+    // 1 = path, 2 = line, 3 = severity, 4 = module, 5 = code, 6 = message, 7 = verbosity
+    let regex = /^(.*)\(([0-9]+)\):\s*(\w+)(\s+\w+):\s+\[(.*?)\](.*?)\[(.*?)\]/gm;
     let regexArray: RegExpExecArray;
     let fileData: { [key: string]: RegExpExecArray[] } = {};
     while (regexArray = regex.exec(result)) {
         if (regexArray[1] === undefined || regexArray[2] === undefined
             || regexArray[3] === undefined || regexArray[4] === undefined
-            || regexArray[5] === undefined) {
+            || regexArray[5] === undefined || regexArray[6] === undefined
+            || regexArray[7] === undefined) {
             continue;
         }
 
@@ -60,7 +61,7 @@ export function analysisResult(diagnosticCollection: vscode.DiagnosticCollection
                 let array = fileData[fileName][index];
                 let line = Number(array[2]);
                 let severity = array[3];
-                let message = array[4];
+                let message = array[6];
 
                 if (line > 0) {
                     line--;
